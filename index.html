@@ -153,7 +153,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; backgroun
   position: absolute;
   display: flex; align-items: center; justify-content: center;
   text-align: center; font-size: 9px; font-weight: 700;
-  border-radius: 3px; pointer-events: none; white-space: nowrap;
+  border-radius: 3px; pointer-events: none !important; white-space: nowrap;
   z-index: 30;
 }
 .fac-wc {
@@ -178,7 +178,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; backgroun
   position: absolute;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  text-align: center; pointer-events: none;
+  text-align: center; pointer-events: none !important;
   z-index: 30;
 }
 .fac-icon {
@@ -187,7 +187,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; backgroun
 .fac-label {
   font-size: 7px; font-weight: 700;
   line-height: 1.2; margin-top: 1px;
-  white-space: nowrap;
+  white-space: nowrap; overflow: visible;
 }
 .fac-entrance {
   background: rgba(34,197,94,0.15);
@@ -202,12 +202,13 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; backgroun
 }
 .fac-exit .fac-label { color: #b91c1c; }
 .fac-wc {
-  background: rgba(59,130,246,0.15);
+  background: rgba(59,130,246,0.18);
   border: 1.5px solid #3b82f6;
   border-radius: 50%;
-  width: 22px !important; height: 22px !important;
+  font-size: 13px;
+  align-items: center; justify-content: center;
 }
-.fac-wc .fac-label { font-size: 6px; color: #1d4ed8; }
+.fac-wc .fac-label { font-size: 13px; color: #1d4ed8; margin:0; }
 .fac-ticket {
   background: rgba(168,85,247,0.12);
   border: 1.5px solid #a855f7;
@@ -323,7 +324,7 @@ function buildMap(mapEl, coords, W, H) {
 
 function showPopup(id) {
   const names = BOOTH_DATA[id];
-  if (!names || !names.length) return;
+  if (!names || !names.length || typeof names === 'undefined') return;
   document.getElementById('pop-no').textContent = id;
   document.getElementById('pop-name').textContent = names[0];
   if (names.length > 1) {
@@ -412,21 +413,20 @@ function buildFacilities(mapEl, list) {
 
 
 const A_FACILITIES = [
-  {"id":"Ticket-Info_A","type":"ticket","label":"티켓·인포데스크","x":1140,"y":622,"w":100,"h":40},
-  {"id":"wc_a1","type":"wc","label":"화장실","x":520,"y":610,"w":22,"h":22},
-  {"id":"wc_a2","type":"wc","label":"화장실","x":754,"y":610,"w":22,"h":22},
-  {"id":"wc_a3","type":"wc","label":"화장실","x":170,"y":10,"w":22,"h":22},
-  {"id":"exit_a","type":"exit","label":"↓ A홀 출구","x":220,"y":620,"w":160,"h":28},
-  {"id":"entrance_a","type":"entrance","label":"↑ A홀 입구","x":640,"y":620,"w":160,"h":28}
+  {"type":"ticket","label":"🎟 티켓·인포데스크","x":1100,"y":590,"w":120,"h":36},
+  {"type":"wc",    "label":"🚻 화장실",          "x":148, "y":155,"w":28,"h":28},
+  {"type":"wc",    "label":"🚻 화장실",          "x":500, "y":590,"w":28,"h":28},
+  {"type":"wc",    "label":"🚻 화장실",          "x":730, "y":590,"w":28,"h":28},
+  {"type":"exit",  "label":"↓ A홀 출구",         "x":50,  "y":600,"w":130,"h":28},
+  {"type":"entrance","label":"↑ A홀 입구",       "x":600, "y":600,"w":130,"h":28}
 ];
 const B_FACILITIES = [
-  {"id":"Ticket-Info_B1","type":"ticket","label":"티켓·인포데스크","x":638,"y":290,"w":52,"h":100},
-  {"id":"wc_b1","type":"wc","label":"화장실","x":618,"y":38,"w":22,"h":22},
-  {"id":"wc_b2","type":"wc","label":"화장실","x":618,"y":360,"w":22,"h":22},
-  {"id":"entrance_b1","type":"entrance","label":"↔ B1홀 출입구","x":540,"y":222,"w":190,"h":36}
+  {"type":"ticket",   "label":"🎟 티켓·인포데스크","x":630,"y":280,"w":50,"h":110},
+  {"type":"wc",       "label":"🚻 화장실",          "x":625,"y":30, "w":28,"h":28},
+  {"type":"wc",       "label":"🚻 화장실",          "x":625,"y":355,"w":28,"h":28},
+  {"type":"entrance", "label":"↔ B1홀 출입구",     "x":440,"y":215,"w":170,"h":32}
 ];
 
-const FAC_ICONS = { entrance:'🚪', exit:'🚪', wc:'🚻', ticket:'🎟' };
 const FAC_CLASS = { entrance:'fac-entrance', exit:'fac-exit', wc:'fac-wc', ticket:'fac-ticket' };
 
 function buildFacilities(mapEl, facilities) {
@@ -434,7 +434,7 @@ function buildFacilities(mapEl, facilities) {
     const el = document.createElement('div');
     el.className = 'facility ' + FAC_CLASS[f.type];
     el.style.cssText = `left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px`;
-    el.innerHTML = `<span class="fac-icon">${FAC_ICONS[f.type]}</span><span class="fac-label">${f.label}</span>`;
+    el.innerHTML = `<span class="fac-label">${f.label}</span>`;
     mapEl.appendChild(el);
   });
 }
