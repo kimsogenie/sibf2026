@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#111111">
+<title>SIBF 2026 부스 배치도</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f0eb; color: #111; }
+
+/* 헤더 */
+.header {
+  background: #111; color: #fff;
+  padding: 12px 16px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 10px;
+}
+.header-text h1 { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.header-text span { font-size: 10px; color: #888; }
+.search-wrap { margin-left: auto; position: relative; flex-shrink: 0; }
+#search {
+  background: #222; border: 1px solid #444; color: #fff;
+  padding: 7px 10px 7px 28px; border-radius: 20px;
+  font-size: 12px; width: 140px; outline: none;
+  -webkit-appearance: none;
+}
+#search::placeholder { color: #666; }
+.search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font-size: 11px; }
+.search-results {
+  display: none; position: absolute; top: calc(100% + 6px); right: 0;
+  width: 240px; background: #fff; border: 1px solid #ddd;
+  border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  max-height: 260px; overflow-y: auto; z-index: 200;
+}
+.sri { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 12px; }
+.sri:hover, .sri:active { background: #f5f5f0; }
+.sri .sno { font-size: 10px; color: #888; margin-bottom: 2px; }
+
+/* 탭 */
+.tabs { display: flex; background: #f0f0eb; border-bottom: 2px solid #ddd; padding: 0 16px; }
+.tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; background: none; color: #999;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  touch-action: manipulation;
+}
+.tab.active { color: #111; border-bottom-color: #111; }
+
+/* 홀 */
+.hall { display: none; padding: 14px 16px 60px; }
+.hall.active { display: block; }
+.hall-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+
+/* 범례 */
+.legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; font-size: 10px; }
+.li { display: flex; align-items: center; gap: 4px; }
+.ld { width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.15); flex-shrink: 0; }
+
+/* 안내 */
+.hint {
+  font-size: 11px; color: #888; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* 지도 */
+.map-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  max-width: 100%;
+}
+.floor-map {
+  position: relative;
+  background: #fff;
+  /* 터치로 스크롤 가능하도록 */
+  touch-action: pan-x pan-y;
+}
+
+/* 부스 */
+.booth {
+  position: absolute;
+  background: #e2e2e2;
+  border: 1px solid #b8b8b8;
+  border-radius: 2px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 2px;
+  cursor: pointer; overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+  touch-action: manipulation;
+  transition: filter 0.1s;
+}
+.booth:active { filter: brightness(0.82); }
+.booth.hl { outline: 3px solid #e5b800; outline-offset: 1px; z-index: 60; background: #ffe566 !important; }
+
+.bn { font-size: 7.5px; font-weight: 700; color: #555; line-height: 1; margin-bottom: 1px; flex-shrink: 0; white-space: nowrap; }
+.bname { font-size: 8px; font-weight: 500; color: #111; line-height: 1.3; word-break: keep-all; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
+/* 특수 색상 */
+.sp-yellow { background: #FFD600 !important; border-color: #d4aa00 !important; }
+.sp-yellow .bn { color: #7a6000; }
+.sp-black { background: #111 !important; border-color: #000 !important; }
+.sp-black .bn { color: #888; }
+.sp-black .bname { color: #fff; }
+.sp-purple { background: #c5aee8 !important; border-color: #8c6bbf !important; }
+.sp-blue { background: #7ec8e3 !important; border-color: #3399bb !important; }
+.sp-orange { background: #FF6B00 !important; border-color: #cc5500 !important; }
+.sp-orange .bn { color: #ffd0a0; }
+.sp-orange .bname { color: #fff; }
+
+/* 모바일 팝업 (툴팁 대신) */
+.popup-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 500;
+  backdrop-filter: blur(2px);
+}
+.popup-overlay.show { display: flex; align-items: flex-end; }
+.popup {
+  background: #fff; border-radius: 16px 16px 0 0;
+  padding: 20px 20px 40px;
+  width: 100%; max-height: 60vh; overflow-y: auto;
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.popup-no { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 6px; }
+.popup-name { font-size: 18px; font-weight: 800; color: #111; margin-bottom: 6px; line-height: 1.3; }
+.popup-list { font-size: 13px; color: #555; line-height: 2; border-top: 1px solid #eee; margin-top: 10px; padding-top: 10px; }
+.popup-list div { border-bottom: 1px solid #f5f5f5; padding: 4px 0; }
+.popup-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #eee; border: none; font-size: 14px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* 푸터 */
+.footer {
+  text-align: center; padding: 28px 20px 40px;
+  font-size: 11px; color: #888;
+  border-top: 1px solid #ddd; margin-top: 20px; line-height: 1.9;
+}
+.footer .ft { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
+.footer a { color: #555; font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-text">
+    <h1>서울국제도서전 2026<br>부스 배치도</h1>
+    <span>COEX · 2026.6.18–22</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="search" type="text" placeholder="출판사 검색">
+    <div class="search-results" id="sr"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchHall('a')">Hall A</button>
+  <button class="tab" onclick="switchHall('b1')">Hall B1</button>
+</div>
+
+<div id="hall-a" class="hall active">
+  <div class="hall-title">Hall A</div>
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#FFD600"></div>특별 구역</div>
+    <div class="li"><div class="ld" style="background:#FF6B00"></div>특수 공간</div>
+    <div class="li"><div class="ld" style="background:#e2e2e2"></div>일반 출판사</div>
+    <div class="li"><div class="ld" style="background:#ffe566;border-color:#e5b800"></div>검색 결과</div>
+  </div>
+  <div class="hint">👆 부스 탭하면 참가사 확인 · 스크롤로 이동</div>
+  <div class="map-scroll"><div class="floor-map" id="map-a"></div></div>
+</div>
+
+<div id="hall-b1" class="hall">
+  <div class="hall-title">Hall B1</div>
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#FFD600"></div>책마당</div>
+    <div class="li"><div class="ld" style="background:#c5aee8"></div>커피/라운지</div>
+    <div class="li"><div class="ld" style="background:#111;border-color:#000"></div>전시/행사</div>
+    <div class="li"><div class="ld" style="background:#7ec8e3"></div>책마을</div>
+    <div class="li"><div class="ld" style="background:#e2e2e2"></div>일반 출판사</div>
+  </div>
+  <div class="hint">👆 부스 탭하면 참가사 확인 · 스크롤로 이동</div>
+  <div class="map-scroll"><div class="floor-map" id="map-b1"></div></div>
+</div>
+
+<!-- 팝업 -->
+<div class="popup-overlay" id="overlay" onclick="closePopup(event)">
+  <div class="popup" id="popup">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <div class="popup-no" id="pop-no"></div>
+    <div class="popup-name" id="pop-name"></div>
+    <div class="popup-list" id="pop-list"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="ft">SIBF 2026 비공식 부스 배치도</div>
+  <div>데이터 출처: <a href="https://sibf.kr" target="_blank">sibf.kr</a> 공식 참가사 정보 기반 재구성</div>
+  <div>비상업적 개인 제작물</div>
+  <div style="margin-top:6px;">Made by <a href="https://instagram.com/kimsogenie" target="_blank">@KIMSOGENIE</a> · 2026</div>
+</div>
+
+<script>
+const A_COORDS={"A1802": {"x": 1032, "y": 183, "w": 50, "h": 50}, "A1801": {"x": 1032, "y": 235, "w": 50, "h": 50}, "A1803": {"x": 1116, "y": 183, "w": 50, "h": 102}, "A1807": {"x": 1200, "y": 157, "w": 24, "h": 50}, "A1806": {"x": 1200, "y": 209, "w": 24, "h": 24}, "A1805": {"x": 1200, "y": 235, "w": 24, "h": 24}, "A1804": {"x": 1200, "y": 261, "w": 24, "h": 24}, "A1201": {"x": 1010, "y": 326, "w": 73, "h": 102}, "A1202": {"x": 1116, "y": 326, "w": 50, "h": 102}, "A1207": {"x": 1200, "y": 300, "w": 24, "h": 24}, "A1206": {"x": 1200, "y": 326, "w": 24, "h": 24}, "A1205": {"x": 1200, "y": 352, "w": 24, "h": 24}, "A1204": {"x": 1200, "y": 378, "w": 24, "h": 24}, "A1203": {"x": 1200, "y": 404, "w": 24, "h": 24}, "A402": {"x": 514, "y": 470, "w": 50, "h": 50}, "A401": {"x": 514, "y": 522, "w": 50, "h": 50}, "A403": {"x": 597, "y": 470, "w": 50, "h": 102}, "A1001": {"x": 514, "y": 326, "w": 50, "h": 102}, "A1002": {"x": 597, "y": 326, "w": 50, "h": 102}, "A1601": {"x": 514, "y": 183, "w": 50, "h": 102}, "A1602": {"x": 597, "y": 183, "w": 50, "h": 102}, "A902": {"x": 341, "y": 326, "w": 50, "h": 50}, "A901": {"x": 341, "y": 378, "w": 50, "h": 50}, "A903": {"x": 424, "y": 326, "w": 50, "h": 102}, "A1502": {"x": 341, "y": 183, "w": 50, "h": 50}, "A1501": {"x": 341, "y": 235, "w": 50, "h": 50}, "A1503": {"x": 424, "y": 183, "w": 50, "h": 102}, "A2102": {"x": 371, "y": 39, "w": 50, "h": 50}, "A2101": {"x": 371, "y": 91, "w": 50, "h": 50}, "A2103": {"x": 454, "y": 39, "w": 50, "h": 102}, "A2401": {"x": 1048, "y": 39, "w": 50, "h": 102}, "A2201": {"x": 541, "y": 39, "w": 50, "h": 102}, "A2202": {"x": 624, "y": 39, "w": 50, "h": 102}, "A2203": {"x": 708, "y": 39, "w": 50, "h": 102}, "A2301": {"x": 795, "y": 39, "w": 50, "h": 102}, "A2302": {"x": 878, "y": 39, "w": 50, "h": 102}, "A2303": {"x": 961, "y": 39, "w": 50, "h": 102}, "A501": {"x": 686, "y": 470, "w": 73, "h": 102}, "A502": {"x": 792, "y": 470, "w": 73, "h": 102}, "A503": {"x": 899, "y": 470, "w": 73, "h": 102}, "A1101": {"x": 686, "y": 326, "w": 73, "h": 102}, "A1102": {"x": 792, "y": 326, "w": 73, "h": 102}, "A1103": {"x": 899, "y": 326, "w": 73, "h": 102}, "A1701": {"x": 686, "y": 183, "w": 73, "h": 102}, "A1702": {"x": 792, "y": 183, "w": 73, "h": 102}, "A1703": {"x": 899, "y": 183, "w": 73, "h": 102}, "A601": {"x": 1010, "y": 470, "w": 131, "h": 102}, "A602": {"x": 1174, "y": 470, "w": 50, "h": 102}, "A104": {"x": 26, "y": 470, "w": 24, "h": 24}, "A103": {"x": 26, "y": 496, "w": 24, "h": 24}, "A102": {"x": 26, "y": 522, "w": 24, "h": 24}, "A101": {"x": 26, "y": 548, "w": 24, "h": 24}, "A108": {"x": 84, "y": 470, "w": 24, "h": 24}, "A107": {"x": 84, "y": 496, "w": 24, "h": 24}, "A106": {"x": 84, "y": 522, "w": 24, "h": 24}, "A105": {"x": 84, "y": 548, "w": 24, "h": 24}, "A112": {"x": 109, "y": 470, "w": 24, "h": 24}, "A111": {"x": 109, "y": 496, "w": 24, "h": 24}, "A110": {"x": 109, "y": 522, "w": 24, "h": 24}, "A109": {"x": 109, "y": 548, "w": 24, "h": 24}, "A2100": {"x": 368, "y": 24, "w": 27, "h": 20}, "A2200": {"x": 539, "y": 24, "w": 27, "h": 20}, "A2300": {"x": 792, "y": 24, "w": 27, "h": 20}, "A2400": {"x": 1046, "y": 24, "w": 27, "h": 20}, "A900": {"x": 339, "y": 311, "w": 27, "h": 20}, "A1500": {"x": 339, "y": 167, "w": 27, "h": 20}, "A400": {"x": 511, "y": 454, "w": 27, "h": 20}, "A1000": {"x": 511, "y": 311, "w": 27, "h": 20}, "A1600": {"x": 511, "y": 167, "w": 27, "h": 20}, "A500": {"x": 684, "y": 454, "w": 27, "h": 20}, "A1100": {"x": 684, "y": 311, "w": 27, "h": 20}, "A1700": {"x": 684, "y": 167, "w": 27, "h": 20}, "A600": {"x": 1007, "y": 454, "w": 27, "h": 20}, "A704": {"x": 26, "y": 326, "w": 24, "h": 24}, "A703": {"x": 26, "y": 352, "w": 24, "h": 24}, "A702": {"x": 26, "y": 378, "w": 24, "h": 24}, "A701": {"x": 26, "y": 404, "w": 24, "h": 24}, "A707": {"x": 84, "y": 326, "w": 24, "h": 24}, "A706": {"x": 84, "y": 352, "w": 24, "h": 50}, "A705": {"x": 84, "y": 404, "w": 24, "h": 24}, "A709": {"x": 109, "y": 326, "w": 24, "h": 50}, "A708": {"x": 109, "y": 378, "w": 24, "h": 50}, "A1304": {"x": 26, "y": 183, "w": 24, "h": 24}, "A1303": {"x": 26, "y": 209, "w": 24, "h": 24}, "A1302": {"x": 26, "y": 235, "w": 24, "h": 24}, "A1301": {"x": 26, "y": 261, "w": 24, "h": 24}, "A1308": {"x": 84, "y": 183, "w": 24, "h": 24}, "A1307": {"x": 84, "y": 209, "w": 24, "h": 24}, "A1306": {"x": 84, "y": 235, "w": 24, "h": 24}, "A1305": {"x": 84, "y": 261, "w": 24, "h": 24}, "A1311": {"x": 109, "y": 183, "w": 24, "h": 24}, "A1310": {"x": 109, "y": 209, "w": 24, "h": 24}, "A1309": {"x": 109, "y": 235, "w": 24, "h": 50}, "A1907": {"x": 139, "y": 39, "w": 24, "h": 24}, "A1906": {"x": 139, "y": 65, "w": 24, "h": 24}, "A1905": {"x": 139, "y": 91, "w": 24, "h": 24}, "A1904": {"x": 139, "y": 117, "w": 24, "h": 24}, "A204": {"x": 171, "y": 470, "w": 24, "h": 24}, "A203": {"x": 171, "y": 496, "w": 24, "h": 24}, "A202": {"x": 171, "y": 522, "w": 24, "h": 24}, "A201": {"x": 171, "y": 548, "w": 24, "h": 24}, "A206": {"x": 196, "y": 470, "w": 24, "h": 50}, "A205": {"x": 196, "y": 522, "w": 24, "h": 50}, "A208": {"x": 254, "y": 470, "w": 24, "h": 50}, "A207": {"x": 254, "y": 522, "w": 24, "h": 50}, "A210": {"x": 280, "y": 470, "w": 24, "h": 50}, "A209": {"x": 280, "y": 522, "w": 24, "h": 50}, "A1404": {"x": 171, "y": 183, "w": 24, "h": 24}, "A1403": {"x": 171, "y": 209, "w": 24, "h": 24}, "A1402": {"x": 171, "y": 235, "w": 24, "h": 24}, "A1401": {"x": 171, "y": 261, "w": 24, "h": 24}, "A1406": {"x": 196, "y": 183, "w": 24, "h": 50}, "A1405": {"x": 196, "y": 235, "w": 24, "h": 50}, "A1408": {"x": 254, "y": 183, "w": 24, "h": 50}, "A1407": {"x": 254, "y": 235, "w": 24, "h": 50}, "A1410": {"x": 280, "y": 183, "w": 24, "h": 50}, "A1409": {"x": 280, "y": 235, "w": 24, "h": 50}, "A302": {"x": 341, "y": 470, "w": 24, "h": 50}, "A301": {"x": 341, "y": 522, "w": 24, "h": 50}, "A304": {"x": 367, "y": 470, "w": 24, "h": 50}, "A303": {"x": 367, "y": 522, "w": 24, "h": 50}, "A306": {"x": 425, "y": 470, "w": 24, "h": 50}, "A305": {"x": 425, "y": 522, "w": 24, "h": 50}, "A308": {"x": 451, "y": 470, "w": 24, "h": 50}, "A307": {"x": 451, "y": 522, "w": 24, "h": 50}, "A802": {"x": 171, "y": 326, "w": 24, "h": 50}, "A801": {"x": 171, "y": 378, "w": 24, "h": 50}, "A804": {"x": 196, "y": 326, "w": 24, "h": 50}, "A803": {"x": 196, "y": 378, "w": 24, "h": 50}, "A806": {"x": 254, "y": 326, "w": 24, "h": 50}, "A805": {"x": 254, "y": 378, "w": 24, "h": 50}, "A808": {"x": 280, "y": 326, "w": 24, "h": 50}, "A807": {"x": 280, "y": 378, "w": 24, "h": 50}, "A1400": {"x": 168, "y": 167, "w": 27, "h": 20}, "A800": {"x": 168, "y": 311, "w": 27, "h": 20}, "A200": {"x": 168, "y": 454, "w": 27, "h": 20}, "A300": {"x": 339, "y": 454, "w": 27, "h": 20}, "A2000": {"x": 198, "y": 24, "w": 27, "h": 20}, "A2004": {"x": 200, "y": 39, "w": 24, "h": 24}, "A2003": {"x": 200, "y": 65, "w": 24, "h": 24}, "A2002": {"x": 200, "y": 91, "w": 24, "h": 24}, "A2001": {"x": 200, "y": 117, "w": 24, "h": 24}, "A2008": {"x": 226, "y": 39, "w": 24, "h": 24}, "A2007": {"x": 226, "y": 65, "w": 24, "h": 24}, "A2006": {"x": 226, "y": 91, "w": 24, "h": 24}, "A2005": {"x": 226, "y": 117, "w": 24, "h": 24}, "A2010": {"x": 284, "y": 39, "w": 50, "h": 50}, "A2009": {"x": 284, "y": 91, "w": 50, "h": 50}, "A100": {"x": 24, "y": 454, "w": 27, "h": 20}, "A700": {"x": 24, "y": 311, "w": 27, "h": 20}, "A1300": {"x": 24, "y": 167, "w": 27, "h": 20}, "A113": {"x": 26, "y": 591, "w": 108, "h": 20}, "A2402": {"x": 1132, "y": 39, "w": 92, "h": 102}, "A1901": {"x": 26, "y": 39, "w": 54, "h": 102}, "A1902": {"x": 110, "y": 68, "w": 24, "h": 76}, "A1900": {"x": 111, "y": 24, "w": 27, "h": 20}, "A1903": {"x": 113, "y": 39, "w": 24, "h": 24}, "A1200": {"x": 1007, "y": 311, "w": 27, "h": 20}, "A1800": {"x": 1030, "y": 167, "w": 27, "h": 20}};
+const B_COORDS={"B602": {"x": 421, "y": 186, "w": 108, "h": 76}, "B601": {"x": 421, "y": 295, "w": 108, "h": 76}, "B605": {"x": 562, "y": 186, "w": 24, "h": 24}, "B604": {"x": 562, "y": 212, "w": 24, "h": 50}, "B608": {"x": 588, "y": 186, "w": 24, "h": 24}, "B607": {"x": 588, "y": 212, "w": 24, "h": 24}, "B606": {"x": 588, "y": 238, "w": 24, "h": 24}, "B603": {"x": 562, "y": 295, "w": 108, "h": 76}, "B103": {"x": 194, "y": 413, "w": 24, "h": 50}, "B102": {"x": 194, "y": 465, "w": 24, "h": 24}, "B101": {"x": 194, "y": 491, "w": 24, "h": 50}, "B106": {"x": 251, "y": 413, "w": 24, "h": 50}, "B105": {"x": 251, "y": 465, "w": 24, "h": 24}, "B104": {"x": 251, "y": 491, "w": 24, "h": 50}, "B109": {"x": 277, "y": 413, "w": 24, "h": 50}, "B108": {"x": 277, "y": 465, "w": 24, "h": 24}, "B107": {"x": 277, "y": 491, "w": 24, "h": 50}, "B303": {"x": 416, "y": 413, "w": 24, "h": 50}, "B302": {"x": 416, "y": 465, "w": 24, "h": 24}, "B301": {"x": 416, "y": 491, "w": 24, "h": 50}, "B306": {"x": 442, "y": 413, "w": 24, "h": 50}, "B305": {"x": 442, "y": 465, "w": 24, "h": 24}, "B304": {"x": 442, "y": 491, "w": 24, "h": 50}, "B309": {"x": 500, "y": 413, "w": 24, "h": 50}, "B308": {"x": 500, "y": 465, "w": 24, "h": 24}, "B307": {"x": 500, "y": 491, "w": 24, "h": 50}, "B203": {"x": 334, "y": 413, "w": 24, "h": 50}, "B202": {"x": 334, "y": 465, "w": 24, "h": 24}, "B201": {"x": 334, "y": 491, "w": 24, "h": 50}, "B206": {"x": 360, "y": 413, "w": 24, "h": 50}, "B205": {"x": 360, "y": 465, "w": 24, "h": 24}, "B204": {"x": 360, "y": 491, "w": 24, "h": 50}, "B707": {"x": 624, "y": 24, "w": 45, "h": 39}, "B706": {"x": 624, "y": 65, "w": 45, "h": 39}, "B705": {"x": 624, "y": 106, "w": 45, "h": 39}, "B502": {"x": 251, "y": 186, "w": 24, "h": 50}, "B503": {"x": 277, "y": 186, "w": 24, "h": 50}, "B501": {"x": 251, "y": 269, "w": 50, "h": 102}, "B505": {"x": 334, "y": 186, "w": 24, "h": 50}, "B506": {"x": 360, "y": 186, "w": 24, "h": 50}, "B504": {"x": 334, "y": 269, "w": 50, "h": 102}, "B500": {"x": 249, "y": 170, "w": 27, "h": 20}, "B100": {"x": 191, "y": 397, "w": 27, "h": 20}, "B200": {"x": 332, "y": 397, "w": 27, "h": 20}, "B300": {"x": 414, "y": 397, "w": 27, "h": 20}, "B207": {"x": 285, "y": 569, "w": 120, "h": 20}, "B400": {"x": 24, "y": 186, "w": 190, "h": 185}, "B701": {"x": 24, "y": 24, "w": 169, "h": 120}, "B702": {"x": 224, "y": 24, "w": 66, "h": 120}, "B703": {"x": 322, "y": 24, "w": 66, "h": 120}, "B704": {"x": 419, "y": 24, "w": 174, "h": 120}, "B609": {"x": 645, "y": 186, "w": 24, "h": 76}};
+const A_W=1248,A_H=635,B_W=694,B_H=613;
+
+const BOOTH_DATA = {"A1001": ["주식회사 돌베개", "평산책방"], "A1002": ["재단법인 아모레퍼시픽재단"], "A101": ["고스트북스"], "A102": ["별빛들"], "A103": ["도서출판부카"], "A104": ["봄봄출판사"], "A105": ["단추 출판사"], "A106": ["밝은세상"], "A107": ["애플트리테일즈"], "A108": ["곰세마리", "도서출판 달리"], "A109": ["핀드"], "A110": ["소동출판사"], "A1101": ["민음사 출판그룹", "황금가지"], "A1102": ["인플루엔셜", "윌라", "윌라스토리"], "A1103": ["서울특별시 서울도서관", "신한은행"], "A111": ["시사북스(빈페이지)"], "A112": ["한국출판마케팅연구소"], "A113": ["일러스트레이터스 월"], "A1201": ["타이완콘텐츠진흥원", "CommonWealth Education Media and Publishing Co., Ltd.", "DUMPLING CAT FAMILY", "Hakka Affairs Council", "JS Agency Co., Ltd.", "KAWAII HYOKA / Caiji Art", "REVE BOOKS LTD., CO", "Rye Field Publications, a division of Cite Publishing Ltd.", "SpringHill Publishing", "타코쿠마", "THE GRAYHAWK AGENCY"], "A1202": ["주한태국대사관 상무공사관실", "Amarin Corporations PCL", "BANLUE PUBLICATIONS COMPANY LIMITED", "Channasoot Publishing", "Combang Publishing House Limited Partnership", "DEXPRESS COMPANY LIMITED", "Avocado Books (Earlgrey co.,ltd)", "Glory Forever Public Company Limited", "Golden C Creative content Co.,Ltd.", "HAPPYME-D CO., LTD.", "Liatris publishing", "MITMAKME Group", "모카그룹", "유기적 링크", "Silkwormbooks", "라이터 소울 태국"], "A1203": ["EC Publishing LLC"], "A1204": ["Studio of Books LLC"], "A1205": ["퀴퍼 프린츠"], "A1206": ["프로칠레", "Calcetines Animados", "VLP Agency", "Recrea Libros"], "A1207": ["연변교육출판사", "연변인민출판사", "연변대학출판사"], "A1301": ["엣눈북스"], "A1302": ["서사원 주식회사"], "A1303": ["프란츠"], "A1304": ["귤프레스"], "A1305": ["고요한소리"], "A1306": ["쿵프레스"], "A1307": ["한림출판사"], "A1308": ["소장각", "비플랫폼"], "A1309": ["(주)불광미디어"], "A1310": ["라의눈주식회사"], "A1311": ["유어마인드"], "A1401": ["이룸아이"], "A1402": ["펜타클"], "A1403": ["마음모자"], "A1404": ["스토리보울"], "A1405": ["몽당연필", "구름이머무는동안", "뜰힘", "소유", "아르카", "지우"], "A1406": ["(사)한국기독교출판협회", "도서출판 CUP", "도서출판 동연", "문광서원", "바이블네비게이션(주)", "블리스", "쿰란출판사", "템북"], "A1407": ["아작"], "A1408": ["(주)이퍼블릭 코리아"], "A1409": ["도서출판 키다리"], "A1410": ["에디토리얼", "가지출판사", "메멘토", "목수책방", "혜화1117"], "A1501": ["시공사"], "A1502": ["전국동네책방네트워크"], "A1503": ["엘르 코리아"], "A1601": ["(주)열린책들"], "A1602": ["(주)오팬하우스"], "A1701": ["교보문고", "교보생명 서재"], "A1702": ["주식회사 케이티밀리의서재"], "A1703": ["예스24"], "A1801": ["Livres Canada Books", "Annick Press", "BookLand Press", "Drawn & Quarterly", "Éditions Alto", "Éditions Fonfon", "Éditions Michel Quintin", "Éditions Québec Amérique", "Firefly Books", "Les Éditions les Malins", "McGill-Queen's University Press", "Orca Book Publishers", "University of Toronto Press"], "A1802": ["펭귄랜덤하우스 UK"], "A1803": ["독일 프랑크푸르트도서전", "Arbeitsgemeinschaft von Jugendbuchverlagen e.V.", "Droemer Knaur Publishing Group", "Dunkcer & Humblot GmbH", "German Pavilion", "주한독일문화원", "Kiepenheuer & Witsch", "모어 지베크", "MuseARTa GmbH", "Palomaa Publishing", "Rowohlt Verlag GmbH", "Schweizerbart/Borntraeger Science Publishers", "Ullstein Buchverlage GmbH"], "A1804": ["YUEWEN|WebNovel"], "A1805": ["Beijiao Children Joy Education & Technology (Beijing) Co., Ltd."], "A1806": ["Wells Hamilton Literary Consultants"], "A1807": ["연사 라운지1"], "A1901": ["책만남홀2"], "A1902": ["아트숍"], "A1903": ["연사 라운지2"], "A1904": ["갈라파고스"], "A1905": ["도서출판 들녘"], "A1906": ["원더박스"], "A1907": ["(주)크레용하우스"], "A2001": ["생명의말씀사"], "A2002": ["성서유니온"], "A2003": ["도서출판 폭스코너", "도서출판 다독다독"], "A2004": ["안온북스"], "A2005": ["청미출판사"], "A2006": ["캠퍼스북"], "A2007": ["잉글리시에그"], "A2008": ["우리나비"], "A2009": ["한국출판문화산업진흥원", "그리모어", "나무의말", "다정한시민", "도서출판 11%", "도서출판 어웨이크", "문학정원", "빅퀘스천 출판사", "스타라잇 출판사", "아트레이크 출판사", "좋은습관연구소", "쥬쥬베북스", "책과바람", "한밤의빛", "허밍북스", "호랑이꿈", "호손재"], "A201": ["안그라픽스"], "A2010": ["주식회사 난다"], "A202": ["미디어버스", "사월의눈", "프로파간다"], "A203": ["인북"], "A204": ["안녕로빈"], "A205": ["킨더랜드+반달+여섯번째봄"], "A206": ["(주)학토재"], "A207": ["노란상상"], "A208": ["(주)도서출판보리"], "A209": ["니케북스", "목요일출판사", "페이퍼스토리"], "A210": ["거북이북스"], "A2101": ["사회평론"], "A2102": ["오이뮤"], "A2103": ["은행나무", "(주)휴머니스트 출판그룹"], "A2201": ["길벗어린이"], "A2202": ["문학과지성사"], "A2203": ["소전문화재단"], "A2301": ["서울특별시교육청"], "A2302": ["마음산책", "사계절출판사"], "A2303": ["디자인하우스", "주식회사 오뚜기"], "A2401": ["타이베이도서전재단"], "A2402": ["책만남홀1"], "A301": ["워크룸 프레스"], "A302": ["산지니"], "A303": ["까치글방"], "A304": ["글항아리"], "A305": ["청아출판사 / 봄마중"], "A306": ["도서출판 풀빛"], "A307": ["도서출판 푸른숲"], "A308": ["(사)한국과학기술출판협회", "군자출판사"], "A401": ["보림출판사"], "A402": ["네이버웹툰"], "A403": ["(주)위즈덤하우스"], "A501": ["이야기장수", "솔테라이브러리"], "A502": ["(주)김영사"], "A503": ["(주)문학수첩"], "A601": ["주한프랑스대사관 문화과", "프랑스 출판네트워크 (구 : 프랑스국제출판사무국)"], "A602": ["(주)쌤앤파커스"], "A701": ["봄알람"], "A702": ["타이피스트"], "A703": ["사단법인 한국대학출판협회"], "A704": ["도서출판 북극곰"], "A705": ["국민서관"], "A706": ["주식회사 성안당"], "A707": ["책읽는고양이"], "A708": ["소미미디어"], "A709": ["고래인", "키큰도토리"], "A801": ["부산출판문화산업협회", "고양이함수", "공공북스", "냥이의야옹", "뮤트스튜디오", "씨엘미디어", "해피북미디어"], "A802": ["주식회사 소원나무"], "A803": ["뜨인돌출판"], "A804": ["밝은미래"], "A805": ["도서출판 동녘"], "A806": ["클레이하우스 주식회사"], "A807": ["보스토크 프레스", "프리즘오브"], "A808": ["진선출판사"], "A901": ["윌북"], "A902": ["더중앙플러스"], "A903": ["동아시아·허블"], "B101": ["어크로스"], "B102": ["움직씨 출판사", "오리집"], "B103": ["(주)책읽는곰"], "B104": ["페이퍼독", "토끼섬"], "B105": ["송송책방"], "B106": ["꿈공장플러스"], "B107": ["아카넷"], "B108": ["디자인이음"], "B109": ["컬처룩", "코쿤북스"], "B201": ["유유출판사"], "B202": ["바람북스"], "B203": ["레모 출판사", "스위밍꿀"], "B204": ["주식회사 도서출판점자"], "B205": ["후즈갓마이테일"], "B206": ["흰토끼프레스(바캉스프로젝트)"], "B207": ["SIBF × 글월 〈페이지 사이의 우체국〉"], "B301": ["도서출판 노란돼지"], "B302": ["늘보의 섬"], "B303": ["(주)창비교육"], "B304": ["서해문집"], "B305": ["한림사"], "B306": ["나비클럽"], "B307": ["국립생태원"], "B308": ["퍼머넌트북스"], "B309": ["주식회사 한겨레엔"], "B400": ["책마을", "누땡스", "텍스트 프레스", "프레스탁!", "225호", "라마북스", "비바 헤리티지 시리즈", "라우더북스", "Fidèle éditions", "Owl & Dog Playbooks", "프레스룸", "히스테리안", "행복한 재수가 있는", "두낫프레스?프레스!", "자인운트", "유연성클럽", "메이커메이커", "0.1", "검정프레스", "써니라운드", "픽션들", "남섬책방", "시네필 책방 코프키노", "요호이", "스튜디오604", "돛과닻", "스크립토", "타바코북스", "머쉬룸", "소환사", "마그네틱 파이브", "하호하호", "1도씨와 온도들", "후루룩", "유일무이(누구나)", "코스모 프레스", "아뜰리에아쉬", "라우트 프레스", "오큐파이 더 시티", "길고도 짧은 이야기", "무주산골영화제", "미스테리어스플랜트", "소화당", "김주영", "삐약삐약북스", "카인드오브썸머", "마블로켓", "블루토마토즈", "노말에이", "연필과머그", "까막북", "에트르", "책덕", "디 오브젝트", "TEMPORARY BOOKSHOP | C시지G", "파도", "선과 결", "탱크 프레스", "바이블랭크", "te editions", "One Stroke", "마테리알", "소시민워크", "그래픽하", "인공위성+82", "수목요일(모눈지)", "하이오 웍스", "미씽아카이브", "Image 3", "Homeward", "Rusuban Studio", "Indie Publishers Association of Taiwan", "comma books", "Guerrilla Publishing Co., Ltd", "Halftone Press", "Kuroshio Culture Co. Ltd.", "LA VIE CINE studio", "Monsoon Zone Publishing Co., Ltd.", "MULU OFFICE CO., LTD.", "SiLoo Story", "Slowork Publishing Ltd.", "TOKHIU BOOKS CO., LTD.", "Independent Publishers Expo", "Singapore Art Book Fair", "Blue Sheep Co., ltd.", "ELVIS PRESS", "LLC INSECTS", "Manazuru Publishing", "Milllion Years Bookstore", "Nanarokusha Publishing", "rn press INC.", "Seki Shobo", "Shinyodo", "Shoshikankanbou", "Tababooks", "The Editorial Department Inc.", "Troublemakers Publishing", "Tsumujikaze-sha", "Thing Books Pte Ltd", "THEBOOKSHOW", "Thumb Books"], "B501": ["한솔제지(주)"], "B502": ["윤에디션"], "B503": ["롤러코스터", "초록비책공방"], "B504": ["마포출판문화진흥센터", "경옥초이", "내로라 출판사", "니라이카나이", "도깨비사", "두두플래닛", "두유라이크", "리케의 디자인랩", "마리유니버스", "머핀북", "무블출판사", "무중력프레스", "물숨", "밤두", "북스토어블", "붉은사슴", "빛틈", "생각하는 달팽이", "선홍빛", "스튜디오 에디트", "스튜디오블랑", "쓰는사람", "여가도시", "여름의서재", "유유히", "인생책방/마이북하우스", "정재이프레스", "출판사 이베르", "테일브릿지", "톰톰프레스", "페이지미디어브릿지", "해파리", "혼혼"], "B505": ["쪽프레스"], "B506": ["도서출판도반"], "B601": ["안전가옥"], "B602": ["문학동네"], "B603": ["창비"], "B604": ["아침달"], "B605": ["다람출판사"], "B606": ["주식회사 휴먼밸류 / 더클래스"], "B607": ["북챗"], "B608": ["썸북스"], "B609": ["국가보훈부"], "B701": ["(주)커피 리브레"], "B702": ["BBK × SIBF 책 라운지 with 일룸"], "B703": ["주제전시"], "B704": ["책마당"], "B705": ["프레스룸"], "B706": ["연사 라운지3"], "B707": ["연사 라운지"]}
+
+const SPECIAL = {"A1901":"sp-yellow","A2402":"sp-yellow","A1902":"sp-orange","A1903":"sp-orange","A1807":"sp-orange","A113":"sp-orange","B701":"sp-purple","B702":"sp-black","B703":"sp-black","B704":"sp-yellow","B400":"sp-blue","B705":"sp-orange","B706":"sp-orange","B707":"sp-orange","B207":"sp-orange","B609":"sp-orange"}
+
+function getShort(id) {
+  const names = BOOTH_DATA[id];
+  if (!names || !names.length) return '';
+  return names[0];
+}
+
+function buildMap(mapEl, coords, W, H) {
+  mapEl.style.width = W + 'px';
+  mapEl.style.height = H + 'px';
+  Object.entries(coords).forEach(([id, c]) => {
+    const el = document.createElement('div');
+    el.className = 'booth' + (SPECIAL[id] ? ' ' + SPECIAL[id] : '');
+    el.id = 'b-' + id;
+    el.style.cssText = `left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px`;
+
+    const no = document.createElement('div');
+    no.className = 'bn'; no.textContent = id;
+    const nm = document.createElement('div');
+    nm.className = 'bname'; nm.textContent = getShort(id);
+
+    el.appendChild(no); el.appendChild(nm);
+
+    // 모바일: 탭하면 팝업
+    el.addEventListener('click', () => showPopup(id));
+    mapEl.appendChild(el);
+  });
+}
+
+function showPopup(id) {
+  const names = BOOTH_DATA[id];
+  if (!names || !names.length) return;
+  document.getElementById('pop-no').textContent = id;
+  document.getElementById('pop-name').textContent = names[0];
+  if (names.length > 1) {
+    document.getElementById('pop-list').innerHTML = names.slice(1).map(n => `<div>${n}</div>`).join('');
+    document.getElementById('pop-list').style.display = 'block';
+  } else {
+    document.getElementById('pop-list').innerHTML = '';
+    document.getElementById('pop-list').style.display = 'none';
+  }
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closePopup(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function switchHall(hall) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (hall==='a'&&i===0)||(hall==='b1'&&i===1)));
+  document.getElementById('hall-a').classList.toggle('active', hall==='a');
+  document.getElementById('hall-b1').classList.toggle('active', hall==='b1');
+}
+
+// 검색
+const searchInput = document.getElementById('search');
+const srDiv = document.getElementById('sr');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { srDiv.style.display='none'; return; }
+  const hits = [];
+  Object.entries(BOOTH_DATA).forEach(([booth, names]) => {
+    names.forEach(name => { if (name.toLowerCase().includes(q)) hits.push({booth, name}); });
+  });
+  if (!hits.length) { srDiv.style.display='none'; return; }
+  srDiv.innerHTML = hits.slice(0,20).map(h =>
+    `<div class="sri" onclick="goBooth('${h.booth}')"><div class="sno">${h.booth}</div>${h.name}</div>`
+  ).join('');
+  srDiv.style.display = 'block';
+});
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) srDiv.style.display='none'; });
+
+function goBooth(id) {
+  srDiv.style.display='none'; searchInput.value='';
+  const hall = id.startsWith('B') ? 'b1' : 'a';
+  switchHall(hall);
+  document.querySelectorAll('.booth.hl').forEach(el => el.classList.remove('hl'));
+  setTimeout(() => {
+    const el = document.getElementById('b-' + id);
+    if (el) {
+      el.classList.add('hl');
+      el.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+      showPopup(id);
+    }
+  }, 80);
+}
+
+buildMap(document.getElementById('map-a'), A_COORDS, A_W, A_H);
+buildMap(document.getElementById('map-b1'), B_COORDS, B_W, B_H);
+</script>
+</body>
+</html>
