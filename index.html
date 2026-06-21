@@ -96,7 +96,13 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; backgroun
   transition: filter 0.1s;
 }
 .booth:active { filter: brightness(0.82); }
-.booth.hl { outline: 3px solid #e5b800; outline-offset: 1px; z-index: 60; background: #ffe566 !important; }
+.booth.hl {
+  outline: 3px solid #00ff88;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #00ff88, 0 0 16px 4px #00ff8899;
+  z-index: 60;
+  background: #ccffe8 !important;
+}
 
 .bn { font-size: 7.5px; font-weight: 700; color: #555; line-height: 1; margin-bottom: 1px; flex-shrink: 0; white-space: nowrap; }
 .bname { font-size: 8px; font-weight: 500; color: #111; line-height: 1.3; word-break: keep-all; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -331,7 +337,11 @@ function buildMap(mapEl, coords, W, H) {
     const no = document.createElement('div'); no.className='bn'; no.textContent=id;
     const nm = document.createElement('div'); nm.className='bname'; nm.textContent=getShort(id);
     el.appendChild(no); el.appendChild(nm);
-    el.addEventListener('click', ()=>showPopup(id));
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.booth.hl').forEach(b => b.classList.remove('hl'));
+      el.classList.add('hl');
+      showPopup(id);
+    });
     mapEl.appendChild(el);
   });
 }
@@ -420,21 +430,6 @@ function setupZoom(scrollEl) {
       scrollEl.scrollLeft = (scrollLeft + originX) * ratio - originX;
       scrollEl.scrollTop  = (scrollTop  + originY) * ratio - originY;
     }
-
-    // 확대 배율에 따라 텍스트 클램프 조정
-    mapEl.querySelectorAll('.bname').forEach(el => {
-      if (scale >= 1.8) {
-        el.style.webkitLineClamp = 'unset';
-        el.style.overflow = 'visible';
-        el.style.display = 'block';
-        el.parentElement.style.overflow = 'visible';
-      } else {
-        el.style.webkitLineClamp = '2';
-        el.style.overflow = 'hidden';
-        el.style.display = '-webkit-box';
-        el.parentElement.style.overflow = 'hidden';
-      }
-    });
   }
 
   // PC: 휠줌 (Ctrl+휠 or 트랙패드 핀치)
@@ -513,20 +508,6 @@ function addZoomButtons(hallEl) {
     const h = parseInt(mapEl.style.height);
     mapEl.style.marginRight = (w * scale - w) + 'px';
     mapEl.style.marginBottom = (h * scale - h) + 'px';
-
-    mapEl.querySelectorAll('.bname').forEach(el => {
-      if (scale >= 1.8) {
-        el.style.webkitLineClamp = 'unset';
-        el.style.overflow = 'visible';
-        el.style.display = 'block';
-        el.parentElement.style.overflow = 'visible';
-      } else {
-        el.style.webkitLineClamp = '2';
-        el.style.overflow = 'hidden';
-        el.style.display = '-webkit-box';
-        el.parentElement.style.overflow = 'hidden';
-      }
-    });
   }
 
   // reset도 클램프 복구
@@ -535,12 +516,6 @@ function addZoomButtons(hallEl) {
     mapEl.style.transform='scale(1)';
     mapEl.style.marginRight='0';
     mapEl.style.marginBottom='0';
-    mapEl.querySelectorAll('.bname').forEach(el => {
-      el.style.webkitLineClamp = '2';
-      el.style.overflow = 'hidden';
-      el.style.display = '-webkit-box';
-      el.parentElement.style.overflow = 'hidden';
-    });
   };
 
   bar.appendChild(btnOut);
