@@ -403,11 +403,7 @@ function goBooth(id) {
   },80);
 }
 
-// 초기 렌더 (scale=1)
-rebuildMapAtScale(document.getElementById('map-a'),  A_COORDS, A_W, A_H, 1);
-rebuildMapAtScale(document.getElementById('map-b1'), B_COORDS, B_W, B_H, 1);
-rebuildFacilitiesAtScale(document.getElementById('map-a'),  A_FACILITIES, 1);
-rebuildFacilitiesAtScale(document.getElementById('map-b1'), B_FACILITIES, 1);
+
 
 // ── 줌 기능 (실제 크기 재계산 방식) ──────────────────────────
 let currentScale = { a: 1, b: 1 };
@@ -537,6 +533,12 @@ function addZoomButtons(hallEl, coords, W, H, facilities, hallKey) {
 
 addZoomButtons(document.getElementById('hall-a'),  A_COORDS, A_W, A_H, A_FACILITIES, 'a');
 addZoomButtons(document.getElementById('hall-b1'), B_COORDS, B_W, B_H, B_FACILITIES, 'b');
+
+// 초기 렌더 (scale=1) - 함수 정의 후 호출
+rebuildMapAtScale(document.getElementById('map-a'),  A_COORDS, A_W, A_H, 1);
+rebuildMapAtScale(document.getElementById('map-b1'), B_COORDS, B_W, B_H, 1);
+rebuildFacilitiesAtScale(document.getElementById('map-a'),  A_FACILITIES, 1);
+rebuildFacilitiesAtScale(document.getElementById('map-b1'), B_FACILITIES, 1);
 
 
 </script>
