@@ -407,7 +407,6 @@ function setupZoom(scrollEl) {
   const MIN = 0.5, MAX = 4;
 
   function applyScale(s, originX, originY) {
-    // 스크롤 위치 보정
     const prevScale = scale;
     scale = Math.min(MAX, Math.max(MIN, s));
     const ratio = scale / prevScale;
@@ -417,11 +416,25 @@ function setupZoom(scrollEl) {
 
     mapEl.style.transform = `scale(${scale})`;
 
-    // 줌 중심 기준으로 스크롤 위치 보정
     if (originX !== undefined) {
       scrollEl.scrollLeft = (scrollLeft + originX) * ratio - originX;
       scrollEl.scrollTop  = (scrollTop  + originY) * ratio - originY;
     }
+
+    // 확대 배율에 따라 텍스트 클램프 조정
+    mapEl.querySelectorAll('.bname').forEach(el => {
+      if (scale >= 1.8) {
+        el.style.webkitLineClamp = 'unset';
+        el.style.overflow = 'visible';
+        el.style.display = 'block';
+        el.parentElement.style.overflow = 'visible';
+      } else {
+        el.style.webkitLineClamp = '2';
+        el.style.overflow = 'hidden';
+        el.style.display = '-webkit-box';
+        el.parentElement.style.overflow = 'hidden';
+      }
+    });
   }
 
   // PC: 휠줌 (Ctrl+휠 or 트랙패드 핀치)
@@ -496,16 +509,39 @@ function addZoomButtons(hallEl) {
   function zoom(delta) {
     scale = Math.min(4, Math.max(0.5, scale * delta));
     mapEl.style.transform = `scale(${scale})`;
-    // floor-map 크기를 scale에 맞게 scroll 영역 확장
     const w = parseInt(mapEl.style.width);
     const h = parseInt(mapEl.style.height);
     mapEl.style.marginRight = (w * scale - w) + 'px';
     mapEl.style.marginBottom = (h * scale - h) + 'px';
+
+    mapEl.querySelectorAll('.bname').forEach(el => {
+      if (scale >= 1.8) {
+        el.style.webkitLineClamp = 'unset';
+        el.style.overflow = 'visible';
+        el.style.display = 'block';
+        el.parentElement.style.overflow = 'visible';
+      } else {
+        el.style.webkitLineClamp = '2';
+        el.style.overflow = 'hidden';
+        el.style.display = '-webkit-box';
+        el.parentElement.style.overflow = 'hidden';
+      }
+    });
   }
 
-  btnIn.onclick    = () => zoom(1.25);
-  btnOut.onclick   = () => zoom(0.8);
-  btnReset.onclick = () => { scale=1; mapEl.style.transform='scale(1)'; mapEl.style.marginRight='0'; mapEl.style.marginBottom='0'; };
+  // reset도 클램프 복구
+  btnReset.onclick = () => {
+    scale=1;
+    mapEl.style.transform='scale(1)';
+    mapEl.style.marginRight='0';
+    mapEl.style.marginBottom='0';
+    mapEl.querySelectorAll('.bname').forEach(el => {
+      el.style.webkitLineClamp = '2';
+      el.style.overflow = 'hidden';
+      el.style.display = '-webkit-box';
+      el.parentElement.style.overflow = 'hidden';
+    });
+  };
 
   bar.appendChild(btnOut);
   bar.appendChild(btnReset);
